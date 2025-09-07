@@ -1,0 +1,5 @@
+issuer: https://token.actions.githubusercontent.com
+subject_pattern: "repo:liatrio/fastmcp-github-oauth:ref:refs/heads/main"
+
+permissions:
+  contents: write

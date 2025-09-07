@@ -1,0 +1,39 @@
+name: Tag Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  tag-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get Octo STS Token
+        uses: octo-sts/action@e480437973a6f6ac2e9caa40ecabedc870d76395
+        id: octo-sts
+        with:
+          scope: ${{ github.repository }}
+          identity: semantic-release
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ steps.octo-sts.outputs.token }}
+
+      - uses: go-semantic-release/action@v1
+        id: semantic-release
+        with:
+          github-token: ${{ steps.octo-sts.outputs.token }}
