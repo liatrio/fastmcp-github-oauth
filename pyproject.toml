@@ -1,0 +1,25 @@
+[project]
+name = "fastmcp-github-oauth-example"
+version = "0.1.0"
+description = "Example MCP server demonstrating GitHub OAuth authentication with FastMCP"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastmcp>=2.6.0",
+    "httpx>=0.25.0",
+    "starlette>=0.27.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0"
+]
+
+[project.scripts]
+github-oauth-server = "fastmcp_github_oauth_example.server:main"
+
+[build-system]
+requires = ["uv_build>=0.8.11,<0.9.0"]
+build-backend = "uv_build"

@@ -1,0 +1,56 @@
+version: 2
+
+project_name: fastmcp-github-oauth-example
+
+before:
+  hooks:
+    - uv sync
+
+builds:
+  - id: wheel
+    builder: uv
+    buildmode: wheel
+    env:
+      - UV_BUILD_BACKEND=uv_build
+
+dockers:
+  - ids:
+      - wheel  # Reference the wheel build artifact
+    image_templates:
+      - "ghcr.io/{{.Env.GITHUB_REPOSITORY_OWNER}}/{{.ProjectName}}:{{.Version}}-amd64"
+    use: buildx
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+  - ids:
+      - wheel  # Reference the wheel build artifact
+    image_templates:
+      - "ghcr.io/{{.Env.GITHUB_REPOSITORY_OWNER}}/{{.ProjectName}}:{{.Version}}-arm64"
+    use: buildx
+    goarch: arm64
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+
+docker_manifests:
+  - name_template: "ghcr.io/{{.Env.GITHUB_REPOSITORY_OWNER}}/{{.ProjectName}}:{{.Version}}"
+    image_templates:
+      - "ghcr.io/{{.Env.GITHUB_REPOSITORY_OWNER}}/{{.ProjectName}}:{{.Version}}-amd64"
+      - "ghcr.io/{{.Env.GITHUB_REPOSITORY_OWNER}}/{{.ProjectName}}:{{.Version}}-arm64"
+  - name_template: "ghcr.io/{{.Env.GITHUB_REPOSITORY_OWNER}}/{{.ProjectName}}:latest"
+    image_templates:
+      - "ghcr.io/{{.Env.GITHUB_REPOSITORY_OWNER}}/{{.ProjectName}}:{{.Version}}-amd64"
+      - "ghcr.io/{{.Env.GITHUB_REPOSITORY_OWNER}}/{{.ProjectName}}:{{.Version}}-arm64"
+
+release:
+  github:
+    owner: "{{.Env.GITHUB_REPOSITORY_OWNER}}"
+    name: "{{.ProjectName}}"
