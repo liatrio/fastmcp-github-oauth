@@ -72,21 +72,11 @@ uv sync
 cp .env.example .env
 # Edit .env with your GitHub OAuth credentials
 
-# Run the server
-uv run github-oauth-server
+# Run the server (loads environment from .env)
+uv run --env-file .env github-oauth-server
 ```
 
 ### 3. Docker Deployment
-
-#### Using Docker Compose (Recommended)
-
-```bash
-# Build and run with Docker Compose
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-```
 
 #### Using Published Image
 
@@ -98,7 +88,7 @@ docker run -d \
   -e GITHUB_CLIENT_SECRET=your_client_secret \
   -e BASE_URL=http://localhost:8000 \
   --name fastmcp-server \
-  ghcr.io/YOUR_ORG/fastmcp-github-oauth-example:latest
+  ghcr.io/YOUR_ORG/fastmcp-github-oauth-example:<architecture-tag>
 ```
 
 ### 4. Verify Installation
@@ -141,13 +131,14 @@ The easiest way to test the server is using the MCP Inspector:
 
 ```bash
 # Start the MCP server (in one terminal)
-uv run github-oauth-server
+uv run --env-file .env github-oauth-server
 
 # Test with MCP Inspector (in another terminal)
 npx @modelcontextprotocol/inspector@latest http://localhost:8000/mcp/
 ```
 
 The MCP Inspector will:
+
 1. Open a web interface for testing MCP servers
 2. Handle the GitHub OAuth flow automatically
 3. Allow you to test all available tools interactively
@@ -193,19 +184,19 @@ fastmcp-github-oauth-example/
 uv sync --group dev
 
 # Run with auto-reload (development)
-uv run python -m fastmcp_github_oauth_example.server
+uv run --env-file .env python -m fastmcp_github_oauth_example.server
 
 # Format code
 uv run black src/
 
-# Lint code  
+# Lint code
 uv run ruff check src/
 
 # Build package
 uv build
 
 # Test GoReleaser build (no Docker push)
-goreleaser build --snapshot --clean
+GITHUB_REPOSITORY_OWNER=YOUR_ORG goreleaser build --snapshot --clean
 ```
 
 ### Testing
@@ -218,15 +209,8 @@ uv run black --check src/
 # Test server import
 uv run python -c "from fastmcp_github_oauth_example import create_server"
 
-# Test Docker build locally
-docker build -t test-image .
-docker run --rm -p 8000:8000 \
-  -e GITHUB_CLIENT_ID=test \
-  -e GITHUB_CLIENT_SECRET=test \
-  test-image
-
 # Test GoReleaser snapshot build
-goreleaser release --snapshot --clean
+GITHUB_REPOSITORY_OWNER=YOUR_ORG goreleaser release --snapshot --clean
 ```
 
 ## Deployment
@@ -306,7 +290,7 @@ Enable detailed logging:
 
 ```bash
 # Local development
-FASTMCP_DEBUG=true uv run github-oauth-server
+FASTMCP_DEBUG=true uv run --env-file .env github-oauth-server
 
 # Docker
 docker run -e FASTMCP_DEBUG=true -p 8000:8000 fastmcp-github-oauth-example
