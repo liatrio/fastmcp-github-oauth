@@ -4,19 +4,7 @@ from fastmcp import FastMCP
 from fastmcp.server.auth.providers.github import GitHubProvider
 from fastmcp.server.dependencies import get_access_token
 from starlette.responses import JSONResponse
-from starlette.routing import Route
 from starlette.requests import Request
-
-
-def create_health_endpoint():
-    """Create health check endpoint for container monitoring."""
-
-    async def health(request: Request):
-        return JSONResponse(
-            {"status": "healthy", "service": "fastmcp-github-oauth", "version": "0.1.0"}
-        )
-
-    return Route("/health", health, methods=["GET"])
 
 
 def create_server():
@@ -44,8 +32,15 @@ def create_server():
     mcp = FastMCP(
         name="GitHub OAuth Example Server",
         auth=auth_provider,
-        routes=[create_health_endpoint()],  # Add health check
     )
+
+    # Add health check endpoint using custom route decorator
+    @mcp.custom_route("/health", methods=["GET"])
+    async def health_check(request: Request):
+        """Health check endpoint for container monitoring."""
+        return JSONResponse(
+            {"status": "healthy", "service": "fastmcp-github-oauth", "version": "0.1.0"}
+        )
 
     @mcp.tool
     async def get_user_info() -> Dict[str, Any]:
@@ -128,6 +123,9 @@ def main():
         )
 
         mcp.run(transport="http", port=port, host=host)
+    except KeyboardInterrupt:
+        print("\n🛑 Shutting down server gracefully...")
+        exit(0)
     except ValueError as e:
         print(f"❌ Configuration Error: {e}")
         print("💡 Make sure to set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET")
