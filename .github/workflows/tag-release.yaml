@@ -33,7 +33,16 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.octo-sts.outputs.token }}
 
-      - uses: go-semantic-release/action@v1
-        id: semantic-release
+      - name: Calculate release version
+        id: calculate_new_version
+        uses: mathieudutour/github-tag-action@v6.2
         with:
-          github-token: ${{ steps.octo-sts.outputs.token }}
+          dry_run: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tag release
+        id: push_tag
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          custom_tag: ${{ steps.calculate_new_version.outputs.new_version }}
+          github_token: ${{ steps.octo-sts.outputs.token }}
